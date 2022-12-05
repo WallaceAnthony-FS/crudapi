@@ -5,12 +5,27 @@ import path from "path"
 import cors from "cors"
 import studentRouter from "./routes/students.routes.js"
 
+// Load environment variables
 dotenv.config()
 
+// Add __filename and __dirname to esm
+import * as url from 'url';
+const __filename = url.fileURLToPath(import.meta.url);
+const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
+
+// create app and setup middleware
 const app = express()
 app.use(express.json())
+app.use(cors())
 
-app.use('/students', studentRouter)
+// Routes
+app.use('/api/v1/students', studentRouter)
+
+// Serve static bundle if route is not /api/*
+app.use(express.static(path.join(__dirname, '../reactjs/build')))
+app.get('/*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../reactjs/build', 'index.html'))
+})
 
 
 const PORT = process.env.PORT || 8000
